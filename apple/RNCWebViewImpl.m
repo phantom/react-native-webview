@@ -1086,6 +1086,17 @@ RCTAutoInsetsProtocol>
 }
 #endif // !TARGET_OS_OSX
 
+- (void)postRpcMessage:(NSString *)message targetOrigin:(NSString *)targetOrigin isMainFrame:(BOOL)isMainFrame
+{
+  NSDictionary *eventInitDict = @{@"data": message, @"isMainFrame": @(isMainFrame)};
+  NSString *source = [NSString
+                      stringWithFormat:@"var expectedOrigin = \"%@\"; if (expectedOrigin === undefined || expectedOrigin === null || expectedOrigin ===\"*\" || window.location.origin === expectedOrigin) { window.dispatchEvent(new MessageEvent('message', %@)); }",
+                      targetOrigin,
+                      RCTJSONStringify(eventInitDict, NULL)
+  ];
+  [self injectJavaScript: source];
+}
+
 - (void)postMessage:(NSString *)message
 {
   NSDictionary *eventInitDict = @{@"data": message};

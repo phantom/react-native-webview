@@ -514,6 +514,10 @@ Class<RCTComponentViewProtocol> RNCWebViewCls(void)
     // android only
 }
 
+- (void)postRpcMessage:(nonnull NSString *)data targetOrigin:(nonnull NSString *)targetOrigin isMainFrame:(BOOL)isMainFrame {
+    [_view postRpcMessage:data targetOrigin:targetOrigin isMainFrame:isMainFrame];
+}
+
 - (void)postMessage:(nonnull NSString *)data {
     [_view postMessage:data];
 }

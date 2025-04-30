@@ -141,6 +141,7 @@ shouldStartLoadForRequest:(NSMutableDictionary<NSString *, id> *)request
 + (void)setClientAuthenticationCredential:(nullable NSURLCredential*)credential;
 + (void)setCustomCertificatesForHost:(nullable NSDictionary *)certificates;
 - (void)postMessage:(NSString *_Nullable)message;
+- (void)postRpcMessage:(NSString *_Nullable)message targetOrigin:(NSString *_Nullable)targetOrigin isMainFrame:(BOOL)isMainFrame;
 - (void)injectJavaScript:(NSString *_Nullable)script;
 - (void)goForward;
 - (void)goBack;

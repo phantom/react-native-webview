@@ -209,6 +209,18 @@ QUICK_RCT_EXPORT_COMMAND_METHOD(stopLoading)
 QUICK_RCT_EXPORT_COMMAND_METHOD(requestFocus)
 
 QUICK_RCT_EXPORT_COMMAND_METHOD_PARAMS(postMessage, message:(NSString *)message, message)
+
+RCT_EXPORT_METHOD(postRpcMessage:(nonnull NSNumber *)reactTag message:(NSString *)message targetOrigin:(NSString *)targetOrigin isMainFrame:(BOOL)isMainFrame)
+{
+  [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, BASE_VIEW_PER_OS() *> *viewRegistry) {
+    RNCWebViewImpl *view = (RNCWebViewImpl *)viewRegistry[reactTag];
+    if (![view isKindOfClass:[RNCWebViewImpl class]]) {
+      RCTLogError(@"Invalid view returned from registry, expecting RNCWebView, got: %@", view);
+    } else {
+      [view postRpcMessage:message targetOrigin:targetOrigin isMainFrame:isMainFrame];
+    }
+  }];
+}
 QUICK_RCT_EXPORT_COMMAND_METHOD_PARAMS(injectJavaScript, script:(NSString *)script, script)
 QUICK_RCT_EXPORT_COMMAND_METHOD_PARAMS(clearCache, includeDiskFiles:(BOOL)includeDiskFiles, includeDiskFiles)
 
