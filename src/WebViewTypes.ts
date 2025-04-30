@@ -111,6 +111,7 @@ export type DecelerationRateConstant = 'normal' | 'fast';
 
 export interface WebViewMessage extends WebViewNativeEvent {
   data: string;
+  isMainFrame?: boolean;
 }
 
 export interface WebViewError extends WebViewNativeEvent {
