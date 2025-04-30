@@ -339,6 +339,10 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
     }
 
     public void onMessage(String message, String sourceUrl) {
+        onMessage(message, sourceUrl, true);
+    }
+
+    public void onMessage(String message, String sourceUrl, Boolean isMainFrame) {
         ThemedReactContext reactContext = getThemedReactContext();
         RNCWebView mWebView = this;
 
@@ -352,6 +356,7 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
                     }
                     WritableMap data = mRNCWebViewClient.createWebViewEvent(webView, sourceUrl);
                     data.putString("data", message);
+                    data.putBoolean("isMainFrame", isMainFrame);
 
                     if (mMessagingJSModule != null) {
                         dispatchDirectMessage(data);
@@ -363,7 +368,8 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
         } else {
             WritableMap eventData = Arguments.createMap();
             eventData.putString("data", message);
-
+            eventData.putBoolean("isMainFrame", isMainFrame);
+            
             if (mMessagingJSModule != null) {
                 dispatchDirectMessage(eventData);
             } else {

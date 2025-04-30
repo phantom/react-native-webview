@@ -149,6 +149,18 @@ const WebViewComponent = forwardRef<{}, IOSWebViewProps>(
         },
         stopLoading: () =>
           webViewRef.current && Commands.stopLoading(webViewRef.current),
+        postRpcMessage: (
+          data: string,
+          targetOrigin: string,
+          isMainFrame?: boolean
+        ) =>
+          webViewRef.current &&
+          Commands.postRpcMessage(
+            webViewRef.current,
+            data,
+            targetOrigin,
+            isMainFrame
+          ),
         postMessage: (data: string) =>
           webViewRef.current && Commands.postMessage(webViewRef.current, data),
         injectJavaScript: (data: string) =>

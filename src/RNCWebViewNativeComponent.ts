@@ -304,6 +304,12 @@ export interface NativeCommands {
     javascript: string
   ) => void;
   requestFocus: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => void;
+  postRpcMessage: (
+    viewRef: React.ElementRef<HostComponent<NativeProps>>,
+    data: string,
+    targetOrigin: string,
+    isMainFrame?: boolean
+  ) => void;
   postMessage: (
     viewRef: React.ElementRef<HostComponent<NativeProps>>,
     data: string
@@ -332,6 +338,7 @@ export const Commands = codegenNativeCommands<NativeCommands>({
     'stopLoading',
     'injectJavaScript',
     'requestFocus',
+    'postRpcMessage',
     'postMessage',
     'loadUrl',
     'clearFormData',

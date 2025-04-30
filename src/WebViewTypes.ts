@@ -16,6 +16,7 @@ type WebViewCommands =
   | 'goBack'
   | 'reload'
   | 'stopLoading'
+  | 'postRpcMessage'
   | 'postMessage'
   | 'injectJavaScript'
   | 'loadUrl'

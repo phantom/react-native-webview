@@ -59,6 +59,39 @@ class RNCWebViewManagerImpl(private val newArch: Boolean = false) {
     private val DEFAULT_LACK_PERMISSION_TO_DOWNLOAD_MESSAGE =
         "Cannot download files as permission was denied. Please provide permission to write to storage, in order to download files."
 
+    private val MESSAGE_EVENT_SCRIPT = """
+        (function () {
+            var event;
+            var data = %s;
+            try {
+                event = new MessageEvent('message', data);
+            } catch (e) {
+                event = document.createEvent('MessageEvent');
+                event.initMessageEvent('message', true, true, data.data, data.origin, data.lastEventId, data.source);
+            }
+            document.dispatchEvent(event);
+        })();
+    """.trimIndent()
+
+    private val RPC_MESSAGE_EVENT_SCRIPT = """
+        (function () {
+            var expectedOrigin = "%s";
+            var isMainFrame = %s;
+            if (expectedOrigin !== undefined && window.location.origin !== expectedOrigin) {
+                return;
+            }
+            var event;
+            var data = %s;
+            try {
+                event = new MessageEvent('message', data);
+            } catch (e) {
+                event = document.createEvent('MessageEvent');
+                event.initMessageEvent('message', true, true, data.data, data.origin, data.lastEventId, data.source);
+            }
+            document.dispatchEvent(event);
+        })();
+    """.trimIndent();
+
     fun createRNCWebViewInstance(context: ThemedReactContext): RNCWebView {
         return RNCWebView(context)
     }
@@ -247,10 +280,11 @@ class RNCWebViewManagerImpl(private val newArch: Boolean = false) {
     val COMMAND_GO_FORWARD = 2
     val COMMAND_RELOAD = 3
     val COMMAND_STOP_LOADING = 4
-    val COMMAND_POST_MESSAGE = 5
-    val COMMAND_INJECT_JAVASCRIPT = 6
-    val COMMAND_LOAD_URL = 7
-    val COMMAND_FOCUS = 8
+    val COMMAND_POST_RPC_MESSAGE = 5
+    val COMMAND_POST_MESSAGE = 6
+    val COMMAND_INJECT_JAVASCRIPT = 7
+    val COMMAND_LOAD_URL = 8
+    val COMMAND_FOCUS = 9
 
     // android commands
     val COMMAND_CLEAR_FORM_DATA = 1000
@@ -263,6 +297,7 @@ class RNCWebViewManagerImpl(private val newArch: Boolean = false) {
         .put("goForward", COMMAND_GO_FORWARD)
         .put("reload", COMMAND_RELOAD)
         .put("stopLoading", COMMAND_STOP_LOADING)
+        .put("postRpcMessage", COMMAND_POST_RPC_MESSAGE)
         .put("postMessage", COMMAND_POST_MESSAGE)
         .put("injectJavaScript", COMMAND_INJECT_JAVASCRIPT)
         .put("loadUrl", COMMAND_LOAD_URL)
@@ -280,21 +315,22 @@ class RNCWebViewManagerImpl(private val newArch: Boolean = false) {
         "goForward" -> webView.goForward()
         "reload" -> webView.reload()
         "stopLoading" -> webView.stopLoading()
+        "postRpcMessage" -> try {
+          val eventInitDict = JSONObject()
+          val targetOrigin = args.getString(1)
+          val isMainFrame = args.getBoolean(2)
+          eventInitDict.put("data", args.getString(0))
+          webView.evaluateJavascriptWithFallback(
+            String.format(RPC_MESSAGE_EVENT_SCRIPT, targetOrigin, isMainFrame.toString(), eventInitDict.toString())
+          )
+        } catch (e: JSONException) {
+          throw RuntimeException(e)
+        }
         "postMessage" -> try {
           val eventInitDict = JSONObject()
           eventInitDict.put("data", args.getString(0))
           webView.evaluateJavascriptWithFallback(
-            "(function () {" +
-              "var event;" +
-              "var data = " + eventInitDict.toString() + ";" +
-              "try {" +
-              "event = new MessageEvent('message', data);" +
-              "} catch (e) {" +
-              "event = document.createEvent('MessageEvent');" +
-              "event.initMessageEvent('message', true, true, data.data, data.origin, data.lastEventId, data.source);" +
-              "}" +
-              "document.dispatchEvent(event);" +
-              "})();"
+            String.format(MESSAGE_EVENT_SCRIPT, eventInitDict.toString())
           )
         } catch (e: JSONException) {
           throw RuntimeException(e)
