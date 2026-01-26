@@ -5,14 +5,15 @@ on:
     branches:
       - master
 
-permissions:
-  contents: write
-  pull-requests: write
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -21,22 +22,18 @@ jobs:
         run: corepack enable
 
       - name: Setup Node.js 20.x
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: 20.x
-          cache: "yarn"
-          registry-url: "https://registry.npmjs.org"
 
       - name: Install Dependencies
-        run: yarn install --immutable
+        run: yarn
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba
         with:
-          version: yarn changeset version
           publish: yarn release
-          commitMode: github-api
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN_PHANTOM_SECURITY_BOT }}
