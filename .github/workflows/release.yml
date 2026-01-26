@@ -20,6 +20,7 @@ jobs:
     env:
       # Force npm to emit provenance (SLSA) when publishing via OIDC.
       NPM_CONFIG_PROVENANCE: true
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN_PHANTOM_SECURITY_BOT }}
 
     steps:
       - name: Checkout Repo
@@ -33,7 +34,7 @@ jobs:
         with:
           node-version: 20.x
           registry-url: "https://registry.npmjs.org"
-          token: ""
+          token: ${{ secrets.NPM_PUBLISH_TOKEN_PHANTOM_SECURITY_BOT }}
 
       - name: Ensure npm 11.5.1+ for trusted publishing
         run: npm install -g npm@^11.5.1
@@ -49,6 +50,3 @@ jobs:
           publish: yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # we use trusted publishing and setup-node will set these incorrectly. Unset if we ever use RO_TOKEN
-          NODE_AUTH_TOKEN: ""
-          NPM_TOKEN: ""
