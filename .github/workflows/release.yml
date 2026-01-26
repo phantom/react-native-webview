@@ -25,10 +25,10 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20.x
+      - name: Setup Node.js 24.x
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 24.x
           registry-url: "https://registry.npmjs.org"
 
       - name: Ensure npm 11.5.1+ for trusted publishing
@@ -50,7 +50,4 @@ jobs:
           commitMode: github-api
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # we use trusted publishing and setup-node will set these incorrectly. Unset if we ever use RO_TOKEN
-          NODE_AUTH_TOKEN: ""
-          NPM_TOKEN: ""
           NPM_CONFIG_PROVENANCE: true
