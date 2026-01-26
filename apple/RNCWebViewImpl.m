@@ -1452,6 +1452,42 @@ RCTAutoInsetsProtocol>
 }
 
 /**
+ * Determines if a MIME type should be blocked from rendering.
+ */
+- (BOOL)shouldBlockMIMETypeFromRendering:(NSString *)mimeType {
+    if (mimeType == nil) {
+        return NO;
+    }
+
+    NSString *normalizedType = [[mimeType componentsSeparatedByString:@";"].firstObject
+                                 stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    normalizedType = [normalizedType lowercaseString];
+
+    static NSSet *blockedTypes = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        blockedTypes = [NSSet setWithObjects:
+            @"application/octet-stream",
+            @"application/x-msdownload",
+            @"application/x-executable",
+            @"application/x-dosexec",
+            @"application/zip",
+            @"application/x-zip-compressed",
+            @"application/x-rar-compressed",
+            @"application/x-7z-compressed",
+            @"application/x-tar",
+            @"application/gzip",
+            @"application/x-gzip",
+            @"application/x-bzip2",
+            @"application/x-msi",
+            nil
+        ];
+    });
+
+    return [blockedTypes containsObject:normalizedType];
+}
+
+/**
  * Decides whether to allow or cancel a navigation after its response is known.
  * @see https://developer.apple.com/documentation/webkit/wknavigationdelegate/1455643-webview?language=objc
  */
@@ -1479,16 +1515,18 @@ RCTAutoInsetsProtocol>
       disposition = [response valueForHTTPHeaderField:@"Content-Disposition"];
     }
     BOOL isAttachment = disposition != nil && [disposition hasPrefix:@"attachment"];
-    if (isAttachment || !navigationResponse.canShowMIMEType) {
-      if (_onFileDownload) {
-        policy = WKNavigationResponsePolicyCancel;
+    NSString *contentType = [response valueForHTTPHeaderField:@"Content-Type"];
+    BOOL isUnsafeMIMEType = [self shouldBlockMIMETypeFromRendering:contentType];
 
+    if (isAttachment || !navigationResponse.canShowMIMEType || isUnsafeMIMEType) {
+      if (_onFileDownload) {
         NSMutableDictionary<NSString *, id> *downloadEvent = [self baseEvent];
         [downloadEvent addEntriesFromDictionary: @{
           @"downloadUrl": (response.URL).absoluteString,
         }];
         _onFileDownload(downloadEvent);
       }
+      policy = WKNavigationResponsePolicyCancel;
     }
   }
 
