@@ -1,5 +1,11 @@
 # @phantom/react-native-webview
 
+## 1.2.1
+
+### Patch Changes
+
+- dbe76c7: Implement MIME type blacklist.
+
 ## 1.2.0
 
 ### Minor Changes
