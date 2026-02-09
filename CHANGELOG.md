@@ -1,5 +1,11 @@
 # @phantom/react-native-webview
 
+## 1.2.2
+
+### Patch Changes
+
+- c71924c: Prevent showing beforeunload event alerts and always allow proceeding
+
 ## 1.2.1
 
 ### Patch Changes
