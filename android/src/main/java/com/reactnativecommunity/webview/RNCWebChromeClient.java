@@ -511,4 +511,10 @@ public class RNCWebChromeClient extends WebChromeClient implements LifecycleEven
         }
         return false;
     }
+
+    @Override
+    public boolean onJsBeforeUnload(WebView view, String url, String message, JsResult result) {
+        result.confirm();
+        return true;  // Consumed - don't show default dialog
+    }
 }
