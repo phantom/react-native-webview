@@ -263,7 +263,7 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
             this.bridgeListener = new WebViewCompat.WebMessageListener() {
               @Override
               public void onPostMessage(@NonNull WebView view, @NonNull WebMessageCompat message, @NonNull Uri sourceOrigin, boolean isMainFrame, @NonNull JavaScriptReplyProxy replyProxy) {
-                RNCWebView.this.onMessage(message.getData(), sourceOrigin.toString(), isMainFrame);
+                RNCWebView.this.onMessage(message.getData(), sourceOrigin.toString(), isMainFrame, view.getUrl());
               }
             };
             WebViewCompat.addWebMessageListener(
@@ -345,10 +345,14 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
     }
 
     public void onMessage(String message, String sourceUrl) {
-        onMessage(message, sourceUrl, null);
+        onMessage(message, sourceUrl, null, null);
     }
 
     public void onMessage(String message, String sourceUrl, @Nullable Boolean isMainFrame) {
+        onMessage(message, sourceUrl, isMainFrame, null);
+    }
+
+    public void onMessage(String message, String sourceUrl, @Nullable Boolean isMainFrame, @Nullable String topFrameUrl) {
         ThemedReactContext reactContext = getThemedReactContext();
         RNCWebView mWebView = this;
 
@@ -365,6 +369,9 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
                     if (isMainFrame != null) {
                         data.putBoolean("isMainFrame", isMainFrame);
                     }
+                    if (topFrameUrl != null) {
+                        data.putString("topFrameUrl", topFrameUrl);
+                    }
 
                     if (mMessagingJSModule != null) {
                         dispatchDirectMessage(data);
@@ -378,6 +385,9 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
             eventData.putString("data", message);
             if (isMainFrame != null) {
                 eventData.putBoolean("isMainFrame", isMainFrame);
+            }
+            if (topFrameUrl != null) {
+                eventData.putString("topFrameUrl", topFrameUrl);
             }
 
             if (mMessagingJSModule != null) {
@@ -476,7 +486,7 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
         public void postMessage(String message) {
             if (mWebView.getMessagingEnabled()) {
                 // Post to main thread because `mWebView.getUrl()` requires to be executed on main.
-                mWebView.post(() -> mWebView.onMessage(message, mWebView.getUrl()));
+                mWebView.post(() -> mWebView.onMessage(message, mWebView.getUrl(), null, mWebView.getUrl()));
             } else {
                 FLog.w(TAG, "ReactNativeWebView.postMessage method was called but messaging is disabled. Pass an onMessage handler to the WebView.");
             }

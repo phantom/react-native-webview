@@ -127,6 +127,8 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
         _view.onMessage = [self](NSDictionary* dictionary) {
             if (_eventEmitter) {
                 auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
+                id topFrameUrlValue = [dictionary valueForKey:@"topFrameUrl"];
+                NSString *topFrameUrl = [topFrameUrlValue isKindOfClass:[NSString class]] ? topFrameUrlValue : @"";
                 facebook::react::RNCWebViewEventEmitter::OnMessage data = {
                     .url = std::string([[dictionary valueForKey:@"url"] UTF8String]),
                     .lockIdentifier = [[dictionary valueForKey:@"lockIdentifier"] doubleValue],
@@ -135,7 +137,8 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                     .canGoForward = static_cast<bool>([[dictionary valueForKey:@"canGoForward"] boolValue]),
                     .loading = static_cast<bool>([[dictionary valueForKey:@"loading"] boolValue]),
                     .data = std::string([[dictionary valueForKey:@"data"] UTF8String]),
-                    .isMainFrame = static_cast<bool>([[dictionary valueForKey:@"isMainFrame"] boolValue])
+                    .isMainFrame = static_cast<bool>([[dictionary valueForKey:@"isMainFrame"] boolValue]),
+                    .topFrameUrl = std::string([topFrameUrl UTF8String], [topFrameUrl lengthOfBytesUsingEncoding:NSUTF8StringEncoding])
                 };
                 webViewEventEmitter->onMessage(data);
             }

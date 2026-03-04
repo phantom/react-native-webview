@@ -788,6 +788,7 @@ RCTAutoInsetsProtocol>
       NSMutableDictionary<NSString *, id> *event = [self baseEvent];
       [event addEntriesFromDictionary: @{@"data": message.body}];
       [event addEntriesFromDictionary: @{@"url": message.frameInfo.request.URL.absoluteString}];
+      [event addEntriesFromDictionary: @{@"topFrameUrl": _webView.URL.absoluteString ?: @""}];
       [event addEntriesFromDictionary: @{@"isMainFrame": @(isMainFrame)}];
       _onMessage(event);
     }
