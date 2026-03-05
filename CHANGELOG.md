@@ -1,5 +1,11 @@
 # @phantom/react-native-webview
 
+## 1.2.3
+
+### Patch Changes
+
+- 4f46080: Fixes and improvements
+
 ## 1.2.2
 
 ### Patch Changes
