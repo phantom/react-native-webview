@@ -79,6 +79,7 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
     protected boolean nestedScrollEnabled = false;
     protected ProgressChangedFilter progressChangedFilter;
     protected boolean mActive = true;
+    protected @Nullable String mLastCommittedUrl;
 
     /**
      * WebView must be created with an context of the current activity
@@ -254,6 +255,14 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
 
     public boolean getMessagingEnabled() {
         return this.messagingEnabled;
+    }
+
+    public void setLastCommittedUrl(@Nullable String url) {
+        this.mLastCommittedUrl = url;
+    }
+
+    public @Nullable String getLastCommittedUrl() {
+        return this.mLastCommittedUrl;
     }
 
     @SuppressLint("RestrictedApi")
@@ -485,8 +494,11 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
         @JavascriptInterface
         public void postMessage(String message) {
             if (mWebView.getMessagingEnabled()) {
+                // Capture top frame URL eagerly to avoid race condition if a navigation
+                // occurs between now and when the runnable executes on the main thread.
+                String topFrameUrl = mWebView.getLastCommittedUrl();
                 // Post to main thread because `mWebView.getUrl()` requires to be executed on main.
-                mWebView.post(() -> mWebView.onMessage(message, mWebView.getUrl(), null, mWebView.getUrl()));
+                mWebView.post(() -> mWebView.onMessage(message, mWebView.getUrl(), null, topFrameUrl));
             } else {
                 FLog.w(TAG, "ReactNativeWebView.postMessage method was called but messaging is disabled. Pass an onMessage handler to the WebView.");
             }

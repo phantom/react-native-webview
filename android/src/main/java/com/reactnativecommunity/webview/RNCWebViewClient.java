@@ -87,6 +87,7 @@ public class RNCWebViewClient extends WebViewClient {
       mLastLoadFailed = false;
 
       RNCWebView reactWebView = (RNCWebView) webView;
+      reactWebView.setLastCommittedUrl(url);
       reactWebView.callInjectedJavaScriptBeforeContentLoaded();
     }
 
