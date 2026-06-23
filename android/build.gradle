@@ -86,6 +86,15 @@ android {
             }
         }
     }
+
+    testOptions {
+        unitTests {
+            // Allow referencing android.* classes from JVM unit tests; the
+            // RNCWebChromeClient permission tests mock everything they touch.
+            returnDefaultValues = true
+            includeAndroidResources = true
+        }
+    }
 }
 
 def reactNativePath = findNodeModulePath(projectDir, "react-native")
@@ -107,4 +116,7 @@ dependencies {
     implementation 'com.facebook.react:react-native:+'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:${safeExtGet('kotlinVersion')}"
     implementation "androidx.webkit:webkit:${safeExtGet('webkitVersion')}"
+
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.mockito:mockito-core:5.11.0"
 }

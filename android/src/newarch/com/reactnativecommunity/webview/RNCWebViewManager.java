@@ -95,6 +95,12 @@ public class RNCWebViewManager extends ViewGroupManager<RNCWebViewWrapper>
     }
 
     @Override
+    @ReactProp(name = "mediaCapturePermissionGrantType")
+    public void setMediaCapturePermissionGrantType(RNCWebViewWrapper view, @Nullable String value) {
+        mRNCWebViewManagerImpl.setMediaCapturePermissionGrantType(view, value);
+    }
+
+    @Override
     @ReactProp(name = "androidLayerType")
     public void setAndroidLayerType(RNCWebViewWrapper view, @Nullable String value) {
         mRNCWebViewManagerImpl.setAndroidLayerType(view, value);
@@ -422,9 +428,6 @@ public class RNCWebViewManager extends ViewGroupManager<RNCWebViewWrapper>
 
     @Override
     public void setHasOnFileDownload(RNCWebViewWrapper view, boolean value) {}
-
-    @Override
-    public void setMediaCapturePermissionGrantType(RNCWebViewWrapper view, @Nullable String value) {}
 
     @Override
     public void setFraudulentWebsiteWarningEnabled(RNCWebViewWrapper view, boolean value) {}

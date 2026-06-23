@@ -40,6 +40,7 @@ class RNCWebViewManagerImpl(private val newArch: Boolean = false) {
     private var mWebViewConfig: RNCWebViewConfig = RNCWebViewConfig { webView: WebView? -> }
     private var mAllowsFullscreenVideo = false
     private var mAllowsProtectedMedia = false
+    private var mMediaCapturePermissionGrantType: String? = null
     private var mDownloadingMessage: String? = null
     private var mLackPermissionToDownloadMessage: String? = null
     private var mHasOnOpenWindowEvent = false
@@ -167,6 +168,7 @@ class RNCWebViewManagerImpl(private val newArch: Boolean = false) {
                     }
                 }
             webChromeClient.setAllowsProtectedMedia(mAllowsProtectedMedia);
+            webChromeClient.setMediaCapturePermissionGrantType(mMediaCapturePermissionGrantType);
             webChromeClient.setHasOnOpenWindowEvent(mHasOnOpenWindowEvent);
             webView.webChromeClient = webChromeClient
         } else {
@@ -178,6 +180,7 @@ class RNCWebViewManagerImpl(private val newArch: Boolean = false) {
                 }
             }
             webChromeClient.setAllowsProtectedMedia(mAllowsProtectedMedia);
+            webChromeClient.setMediaCapturePermissionGrantType(mMediaCapturePermissionGrantType);
             webChromeClient.setHasOnOpenWindowEvent(mHasOnOpenWindowEvent);
             webView.webChromeClient = webChromeClient
         }
@@ -608,6 +611,17 @@ class RNCWebViewManagerImpl(private val newArch: Boolean = false) {
         if (client != null && client is RNCWebChromeClient) {
           client.setAllowsProtectedMedia(enabled)
         }
+      }
+    }
+
+    fun setMediaCapturePermissionGrantType(viewWrapper: RNCWebViewWrapper, value: String?) {
+      val view = viewWrapper.webView
+      // Keep the value so it survives recreation of the WebChromeClient
+      // (eg. when mAllowsFullScreenVideo changes).
+      mMediaCapturePermissionGrantType = value
+      val client = view.webChromeClient
+      if (client != null && client is RNCWebChromeClient) {
+        client.setMediaCapturePermissionGrantType(value)
       }
     }
 

@@ -72,6 +72,11 @@ public class RNCWebViewManager extends ViewGroupManager<RNCWebViewWrapper> {
         mRNCWebViewManagerImpl.setAllowsProtectedMedia(view, value);
     }
 
+    @ReactProp(name = "mediaCapturePermissionGrantType")
+    public void setMediaCapturePermissionGrantType(RNCWebViewWrapper view, @Nullable String value) {
+        mRNCWebViewManagerImpl.setMediaCapturePermissionGrantType(view, value);
+    }
+
     @ReactProp(name = "androidLayerType")
     public void setAndroidLayerType(RNCWebViewWrapper view, @Nullable String value) {
         mRNCWebViewManagerImpl.setAndroidLayerType(view, value);

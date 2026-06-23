@@ -727,6 +727,9 @@ export interface IOSWebViewProps extends WebViewSharedProps {
    * This property specifies how to handle media capture permission requests.
    * Defaults to `prompt`, resulting in the user being prompted repeatedly.
    * Available on iOS 15 and later.
+   *
+   * Note: Android only enforces the `deny` value natively (see
+   * `AndroidWebViewProps`); other values are iOS-only.
    */
   mediaCapturePermissionGrantType?: MediaCapturePermissionGrantType;
 
@@ -1162,6 +1165,16 @@ export interface AndroidWebViewProps extends WebViewSharedProps {
    * @platform android
    */
   allowsProtectedMedia?: boolean;
+
+  /**
+   * This property specifies how to handle media capture permission requests.
+   * On Android, only `deny` is enforced natively: when set, camera/microphone
+   * requests are denied without showing a prompt or triggering an OS permission
+   * dialog. Any other value (including the default `prompt`) preserves the
+   * existing Android prompt behavior.
+   * @platform android
+   */
+  mediaCapturePermissionGrantType?: MediaCapturePermissionGrantType;
 
   /**
    * Function that is invoked when the `WebView` receives an SSL error for a sub-resource.

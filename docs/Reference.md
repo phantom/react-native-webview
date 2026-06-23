@@ -1537,9 +1537,11 @@ Possible values:
 
 Note that a grant may still result in a prompt, for example if the user has never been prompted for the permission before.
 
-| Type   | Required | Platform |
-| ------ | -------- | -------- |
-| string | No       | iOS      |
+On Android, only the `deny` value is enforced natively: when set, camera/microphone requests are denied immediately without showing a prompt or triggering an OS permission dialog. Any other value (including the default `prompt`) preserves the existing Android prompt behavior.
+
+| Type   | Required | Platform     |
+| ------ | -------- | ------------ |
+| string | No       | iOS, Android |
 
 Example:
 

@@ -91,6 +91,12 @@ public class RNCWebChromeClient extends WebChromeClient implements LifecycleEven
     protected RNCWebView.ProgressChangedFilter progressChangedFilter = null;
     protected boolean mAllowsProtectedMedia = false;
 
+    // Mirrors the iOS `mediaCapturePermissionGrantType` prop. Only the `deny`
+    // value is enforced natively on Android for now; any other value (including
+    // null) preserves the existing prompt behavior.
+    protected static final String MEDIA_CAPTURE_GRANT_TYPE_DENY = "deny";
+    protected String mMediaCapturePermissionGrantType = null;
+
     protected boolean mHasOnOpenWindowEvent = false;
 
     public RNCWebChromeClient(RNCWebView webView) {
@@ -156,6 +162,15 @@ public class RNCWebChromeClient extends WebChromeClient implements LifecycleEven
 
     @Override
     public void onPermissionRequest(final PermissionRequest request) {
+        // Honor `mediaCapturePermissionGrantType="deny"` before touching the
+        // requested resources, showing a site-attributed AlertDialog, or asking
+        // the OS for CAMERA/RECORD_AUDIO. This guarantees the dApp browser can
+        // never trigger a trusted-shell media-capture prompt.
+        if (MEDIA_CAPTURE_GRANT_TYPE_DENY.equals(mMediaCapturePermissionGrantType)) {
+            request.deny();
+            return;
+        }
+
         permissionRequest = request;
         grantedPermissions = new ArrayList<>();
         alertPermissions = new ArrayList<>();
@@ -476,6 +491,15 @@ public class RNCWebChromeClient extends WebChromeClient implements LifecycleEven
      */
     public void setAllowsProtectedMedia(boolean enabled) {
       mAllowsProtectedMedia = enabled;
+    }
+
+    /**
+     * Set how media-capture permission requests should be handled.
+     * Only the `deny` value is enforced natively on Android; any other value
+     * (including null) preserves the existing prompt behavior.
+     */
+    public void setMediaCapturePermissionGrantType(String value) {
+      mMediaCapturePermissionGrantType = value;
     }
 
     public void setHasOnOpenWindowEvent(boolean hasEvent) {
