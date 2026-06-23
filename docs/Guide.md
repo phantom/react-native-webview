@@ -386,6 +386,15 @@ By setting `injectedJavaScriptBeforeContentLoadedForMainFrameOnly: false`, the J
 
 #### The `injectedJavaScriptObject` prop
 
+> **🚫 Banned (security) — do not use**
+> On Android, the native bridge serializes this value and wraps it in an
+> **unescaped backtick template literal** before injecting it into the page
+> (see `injectJavascriptObject` in `RNCWebView.java`). A value containing a
+> backtick or `${...}` can break out of the literal and execute arbitrary
+> JavaScript inside the WebView (UXSS). Until the native escaping is fixed,
+> this prop is banned by the `react/forbid-component-props` ESLint rule.
+> See AGE-347.
+
 Due to the Android race condition mentioned above, this more reliable prop was added. While you cannot execute arbitrary JavaScript, you can make an arbitrary JS object available to the JS run in the webview prior to the page load completing.
 
 ```html

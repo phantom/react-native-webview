@@ -259,6 +259,12 @@ const WebViewComponent = forwardRef<{}, IOSWebViewProps>(
         injectedJavaScriptBeforeContentLoadedForMainFrameOnly={
           injectedJavaScriptBeforeContentLoadedForMainFrameOnly
         }
+        // Trusted internal forwarding of the consumer-provided value to the
+        // native component. The `react/forbid-component-props` ban (AGE-347)
+        // is intentionally disabled here so the library can still wire the prop
+        // through; consumer code must not use it until the native
+        // backtick-wrapping is escaped.
+        // eslint-disable-next-line react/forbid-component-props
         injectedJavaScriptObject={JSON.stringify(injectedJavaScriptObject)}
         dataDetectorTypes={
           !dataDetectorTypes || Array.isArray(dataDetectorTypes)

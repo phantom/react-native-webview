@@ -316,6 +316,12 @@ const WebViewComponent = forwardRef<{}, AndroidWebViewProps>(
         setBuiltInZoomControls={setBuiltInZoomControls}
         setDisplayZoomControls={setDisplayZoomControls}
         nestedScrollEnabled={nestedScrollEnabled}
+        // Trusted internal forwarding of the consumer-provided value to the
+        // native component. The `react/forbid-component-props` ban (AGE-347)
+        // is intentionally disabled here so the library can still wire the prop
+        // through; consumer code must not use it until the native
+        // backtick-wrapping in RNCWebView.java is escaped.
+        // eslint-disable-next-line react/forbid-component-props
         injectedJavaScriptObject={JSON.stringify(injectedJavaScriptObject)}
         {...nativeConfig?.props}
       />

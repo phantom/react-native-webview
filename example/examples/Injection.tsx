@@ -53,7 +53,14 @@ export default class Injection extends Component<Props, State> {
               onMessage={() => {}}
               injectedJavaScriptBeforeContentLoadedForMainFrameOnly={false}
               injectedJavaScriptForMainFrameOnly={false}
-              injectedJavaScriptObject={{ hello: "world" }}
+              /*
+               * `injectedJavaScriptObject` is intentionally NOT used here.
+               * On Android the native bridge wraps its value in an unescaped
+               * backtick template literal, allowing template-literal breakout
+               * and arbitrary JS execution in the WebView (UXSS). The prop is
+               * banned via the `react/forbid-component-props` lint rule.
+               * See AGE-347.
+               */
 
               /* We set this property in each frame */
               injectedJavaScriptBeforeContentLoaded={`

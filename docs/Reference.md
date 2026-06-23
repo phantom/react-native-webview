@@ -257,6 +257,15 @@ If `false`, (only supported on iOS and macOS), loads it into all frames (e.g. if
 
 ### `injectedJavaScriptObject`[⬆](#props-index)
 
+> **🚫 Banned (security) — do not use**
+> On Android, the native bridge serializes this value and wraps it in an
+> **unescaped backtick template literal** before injecting it into the page
+> (see `injectJavascriptObject` in `RNCWebView.java`). A value containing a
+> backtick or `${...}` can break out of the literal and execute arbitrary
+> JavaScript inside the WebView (UXSS). Until the native escaping is fixed,
+> this prop is banned by the `react/forbid-component-props` ESLint rule.
+> See AGE-347.
+
 Inject any JavaScript object into the webview so it is available to the JS running on the page.
 
 | Type | Required | Platform                                          |
