@@ -167,6 +167,13 @@ public class RNCWebChromeClient extends WebChromeClient implements LifecycleEven
             request.getResources()
         );
 
+        if (requestedResources.length == 0) {
+            permissionRequest = null;
+            grantedPermissions = null;
+            request.deny();
+            return;
+        }
+
         for (String requestedResource : requestedResources) {
             String androidPermission = null;
             String requestPermissionIdentifier = null;
