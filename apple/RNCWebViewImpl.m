@@ -25,6 +25,28 @@ static NSDictionary* customCertificatesForHost;
 
 NSString *const CUSTOM_SELECTOR = @"_CUSTOM_SELECTOR_";
 
+static NSString *RNCJavaScriptStringLiteral(NSString *value)
+{
+  if (value == nil) {
+    return @"null";
+  }
+
+  NSError *error = nil;
+  NSData *serialized = [NSJSONSerialization dataWithJSONObject:@[value] options:0 error:&error];
+  if (serialized == nil || error != nil) {
+    return @"null";
+  }
+
+  NSString *arrayLiteral = [[NSString alloc] initWithData:serialized encoding:NSUTF8StringEncoding];
+  if (arrayLiteral.length < 2) {
+    return @"null";
+  }
+
+  NSString *quoted = [arrayLiteral substringWithRange:NSMakeRange(1, arrayLiteral.length - 2)];
+  quoted = [quoted stringByReplacingOccurrencesOfString:@"\u2028" withString:@"\\u2028"];
+  return [quoted stringByReplacingOccurrencesOfString:@"\u2029" withString:@"\\u2029"];
+}
+
 #if TARGET_OS_IOS
 // runtime trick to remove WKWebView keyboard default toolbar
 // see: http://stackoverflow.com/questions/19033292/ios-7-uiwebview-keyboard-issue/19042279#19042279
@@ -1778,6 +1800,7 @@ didFinishNavigation:(WKNavigation *)navigation
 - (void)setInjectedJavaScriptObject:(NSString *)source
 {
   _injectedJavaScriptObject = source;
+  NSString *objectJson = RNCJavaScriptStringLiteral(source);
   self.injectedObjectJsonScript = [
     [WKUserScript alloc]
     initWithSource: [
@@ -1785,8 +1808,8 @@ didFinishNavigation:(WKNavigation *)navigation
       stringWithFormat:
        @"window.%@ = window.%@ || {};"
       "window.%@.injectedObjectJson = function () {"
-      "  return `%@`;"
-      "};", MessageHandlerName, MessageHandlerName, MessageHandlerName, source
+      "  return %@;"
+      "};", MessageHandlerName, MessageHandlerName, MessageHandlerName, objectJson
     ]
     injectionTime:WKUserScriptInjectionTimeAtDocumentStart
     /* TODO: For a separate (minor) PR: use logic like this (as react-native-wkwebview does) so that messaging can be used in all frames if desired.

@@ -312,9 +312,10 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
 
     private void injectJavascriptObject() {
       if (getSettings().getJavaScriptEnabled()) {
+        String objectJson = RNCJavaScriptString.quote(injectedJavaScriptObject);
         String js = "(function(){\n" +
           "    window." + JAVASCRIPT_INTERFACE + " = window." + JAVASCRIPT_INTERFACE + " || {};\n" +
-          "    window." + JAVASCRIPT_INTERFACE + ".injectedObjectJson = function () { return " + (injectedJavaScriptObject == null ? null : ("`" + injectedJavaScriptObject + "`")) + "; };\n" +
+          "    window." + JAVASCRIPT_INTERFACE + ".injectedObjectJson = function () { return " + objectJson + "; };\n" +
           "})();";
         evaluateJavascriptWithFallback(js);
       }
