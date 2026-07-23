@@ -1,5 +1,17 @@
 # @phantom/react-native-webview
 
+## 1.2.4
+
+### Patch Changes
+
+- 78dc86f: Honor `mediaCapturePermissionGrantType="deny"` on Android by rejecting camera
+  and microphone resources before the existing permission flow can display a
+  prompt. Other permission resources and grant-type values retain their current
+  behavior.
+- a45290f: Quote `injectedJavaScriptObject` JSON as a JavaScript string on Android and
+  Apple platforms. This preserves nested JSON and control characters while
+  preventing template-literal interpolation from executing injected code.
+
 ## 1.2.3
 
 ### Patch Changes
