@@ -162,7 +162,19 @@ public class RNCWebChromeClient extends WebChromeClient implements LifecycleEven
         // Permissions that we need to ask permission for from the OS
         requestedAndroidPermissions = new ArrayList<>();
 
-        for (String requestedResource : request.getResources()) {
+        String[] requestedResources = RNCMediaCapturePermission.filterRequestedResources(
+            mWebView.getMediaCapturePermissionGrantType(),
+            request.getResources()
+        );
+
+        if (requestedResources.length == 0) {
+            permissionRequest = null;
+            grantedPermissions = null;
+            request.deny();
+            return;
+        }
+
+        for (String requestedResource : requestedResources) {
             String androidPermission = null;
             String requestPermissionIdentifier = null;
 

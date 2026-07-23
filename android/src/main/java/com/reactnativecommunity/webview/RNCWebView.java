@@ -80,6 +80,7 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
     protected ProgressChangedFilter progressChangedFilter;
     protected boolean mActive = true;
     protected @Nullable String mLastCommittedUrl;
+    protected @Nullable String mMediaCapturePermissionGrantType;
 
     /**
      * WebView must be created with an context of the current activity
@@ -263,6 +264,14 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
 
     public @Nullable String getLastCommittedUrl() {
         return this.mLastCommittedUrl;
+    }
+
+    public void setMediaCapturePermissionGrantType(@Nullable String value) {
+        this.mMediaCapturePermissionGrantType = value;
+    }
+
+    public @Nullable String getMediaCapturePermissionGrantType() {
+        return this.mMediaCapturePermissionGrantType;
     }
 
     @SuppressLint("RestrictedApi")

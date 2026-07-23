@@ -582,6 +582,10 @@ class RNCWebViewManagerImpl(private val newArch: Boolean = false) {
         view.settings.setGeolocationEnabled(value)
     }
 
+    fun setMediaCapturePermissionGrantType(viewWrapper: RNCWebViewWrapper, value: String?) {
+        viewWrapper.webView.setMediaCapturePermissionGrantType(value)
+    }
+
     fun setLackPermissionToDownloadMessage(value: String?) {
         mLackPermissionToDownloadMessage = value
     }
