@@ -22,6 +22,9 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   release:
     name: Release
+    # A manual run publishes whatever version the selected ref holds, so accept
+    # master only. The job is skipped for any other ref.
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       contents: write
