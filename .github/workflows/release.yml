@@ -16,8 +16,6 @@ on:
     branches:
       - master
   workflow_dispatch: {}
-  # TEMPORARY, REMOVE BEFORE MERGE. Runs the dry-run probe job below.
-  pull_request: {}
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -49,7 +47,7 @@ jobs:
         with:
           node-version: 22.x
 
-      # Node 20 ships npm 10.x, which has no Trusted Publishing support. Same
+      # Node 22 ships npm 10.x, which has no Trusted Publishing support. Same
       # version phantom/libs pins.
       - name: Install the npm version that supports Trusted Publishing
         run: npm install --global npm@11.5.1
@@ -72,45 +70,3 @@ jobs:
           # unauthenticated and reports only E404 on PUT. Verbose logging turns a
           # future failure into a readable cause.
           NPM_CONFIG_LOGLEVEL: verbose
-
-  # TEMPORARY, REMOVE BEFORE MERGE. Proves the publish authenticates on this
-  # Node version. `npm publish` runs the OIDC exchange before it honors
-  # --dry-run, so this uploads nothing.
-  probe-publish-auth:
-    name: Probe publish auth (dry run)
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          persist-credentials: false
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Setup Node.js 22.x
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 22.x
-
-      - name: Install the npm version that supports Trusted Publishing
-        run: npm install --global npm@11.5.1
-
-      - name: Install Dependencies
-        run: yarn
-
-      - name: Dry-run publish and report the OIDC outcome
-        run: |
-          echo "node $(node --version), npm $(npm --version) at $(command -v npm)"
-          npm publish --dry-run --loglevel verbose > publish.log 2>&1 || true
-          grep -iE "oidc|provenance|E404|Unauthorized" publish.log || true
-          echo "--- verdict ---"
-          if grep -q "Successfully retrieved and set token" publish.log; then
-            echo "OIDC exchange succeeded on this Node version."
-          else
-            echo "OIDC exchange did NOT succeed. Do not merge yet."
-            exit 1
-          fi
