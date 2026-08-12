@@ -16,12 +16,16 @@ on:
     branches:
       - master
   workflow_dispatch: {}
+  # TEMPORARY, REMOVE BEFORE MERGE. It runs the trusted-publishing probe jobs
+  # below on the pull request. The publish job never runs for this event.
+  pull_request: {}
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
     name: Release
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -57,3 +61,85 @@ jobs:
           commitMode: github-api
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # TEMPORARY, REMOVE BEFORE MERGE.
+  #
+  # These two jobs answer one question that the npm web UI can otherwise only
+  # answer to Security: which trusted-publisher configuration does npm expect
+  # for this package? They perform only the OIDC token exchange that
+  # `npm publish` performs internally. They publish nothing.
+  #
+  # npm matches the workflow file name from the OIDC claims, so the probe has to
+  # live in this file to be a fair test. The only difference between the two jobs
+  # is the GitHub environment, because that is the one claim no previous attempt
+  # ever set.
+  #
+  # npm's exchange failure path is silent by design: lib/utils/oidc.js logs at
+  # verbose and returns undefined, so `npm publish` continues unauthenticated and
+  # reports E404 on PUT. These jobs print the real error instead.
+  probe-without-environment:
+    name: Probe trusted publishing (no environment)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Exchange the OIDC token with npm
+        env:
+          ESCAPED_PACKAGE_NAME: "@phantom%2freact-native-webview"
+        run: |
+          ID_TOKEN=$(curl -sS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm:registry.npmjs.org" | jq -r .value)
+          echo "::add-mask::$ID_TOKEN"
+          echo "--- claims this job presents to npm ---"
+          ID_TOKEN="$ID_TOKEN" node -e '
+            const [, payload] = process.env.ID_TOKEN.split(".");
+            const claims = JSON.parse(Buffer.from(payload, "base64url").toString());
+            const keep = ["sub", "repository", "repository_visibility", "job_workflow_ref", "environment"];
+            console.log(JSON.stringify(Object.fromEntries(keep.map(k => [k, claims[k]])), null, 2));
+          '
+          echo "--- exchange response ---"
+          STATUS=$(curl -sS -o body.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer $ID_TOKEN" \
+            "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/$ESCAPED_PACKAGE_NAME")
+          echo "HTTP $STATUS"
+          # A 200 body holds a publish token, so never print it.
+          if [ "$STATUS" = "200" ]; then
+            echo "Exchange succeeded for this workflow file with no environment."
+          else
+            jq -r '.message // .error // .' body.json
+          fi
+
+  probe-with-ci-environment:
+    name: Probe trusted publishing (environment ci)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    environment: ci
+    permissions:
+      id-token: write
+    steps:
+      - name: Exchange the OIDC token with npm
+        env:
+          ESCAPED_PACKAGE_NAME: "@phantom%2freact-native-webview"
+        run: |
+          ID_TOKEN=$(curl -sS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm:registry.npmjs.org" | jq -r .value)
+          echo "::add-mask::$ID_TOKEN"
+          echo "--- claims this job presents to npm ---"
+          ID_TOKEN="$ID_TOKEN" node -e '
+            const [, payload] = process.env.ID_TOKEN.split(".");
+            const claims = JSON.parse(Buffer.from(payload, "base64url").toString());
+            const keep = ["sub", "repository", "repository_visibility", "job_workflow_ref", "environment"];
+            console.log(JSON.stringify(Object.fromEntries(keep.map(k => [k, claims[k]])), null, 2));
+          '
+          echo "--- exchange response ---"
+          STATUS=$(curl -sS -o body.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer $ID_TOKEN" \
+            "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/$ESCAPED_PACKAGE_NAME")
+          echo "HTTP $STATUS"
+          # A 200 body holds a publish token, so never print it.
+          if [ "$STATUS" = "200" ]; then
+            echo "Exchange succeeded for this workflow file with environment ci."
+          else
+            jq -r '.message // .error // .' body.json
+          fi
