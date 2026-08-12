@@ -1,34 +1,62 @@
 name: Release
 
+# Opens the "Version Packages" pull request, and publishes
+# @phantom/react-native-webview to npm once that pull request merges.
+#
+# Publishing uses npm Trusted Publishing (keyless OIDC), so there is no npm
+# token. Security registers the trusted publisher against this repository and
+# this workflow file name, so do not rename this file. Changesets shells out to
+# npm for the publish, and only npm >= 11.5.1 can make the OIDC exchange.
+#
+# Use the manual trigger to retry a publish that failed for an already merged
+# version.
+
 on:
   push:
     branches:
       - master
+  workflow_dispatch: {}
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
     name: Release
+    # A manual run publishes whatever version the selected ref holds, so accept
+    # master only. The job is skipped for any other ref.
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
+      id-token: write
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          # changesets runs with commitMode: github-api, so the version commit
+          # and the tag both go through Octokit. No step needs local git auth.
+          persist-credentials: false
 
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Setup Node.js 20.x
-        uses: actions/setup-node@v3
+      # npm documents Node >= 22.14.0 for Trusted Publishing.
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20.x
+          node-version: 22.x
+
+      # Node 22 ships npm 10.x, which has no Trusted Publishing support. Same
+      # version phantom/libs pins.
+      - name: Install the npm version that supports Trusted Publishing
+        run: npm install --global npm@11.5.1
 
       - name: Install Dependencies
         run: yarn
 
+      # No NPM_TOKEN: npm exchanges the GitHub OIDC token through the trusted
+      # publisher.
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba
@@ -37,4 +65,8 @@ jobs:
           commitMode: github-api
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN_PHANTOM_SECURITY_BOT }}
+          # npm's OIDC exchange fails silently by design: lib/utils/oidc.js logs
+          # at verbose and returns undefined, then the publish continues
+          # unauthenticated and reports only E404 on PUT. Verbose logging turns a
+          # future failure into a readable cause.
+          NPM_CONFIG_LOGLEVEL: verbose
