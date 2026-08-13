@@ -1164,6 +1164,15 @@ export interface AndroidWebViewProps extends WebViewSharedProps {
   allowsProtectedMedia?: boolean;
 
   /**
+   * This property specifies how to handle media capture permission requests.
+   * On Android, `deny` blocks camera and microphone requests without showing
+   * a WebView or operating-system permission prompt. Other values preserve the
+   * existing prompt behavior.
+   * @platform android
+   */
+  mediaCapturePermissionGrantType?: MediaCapturePermissionGrantType;
+
+  /**
    * Function that is invoked when the `WebView` receives an SSL error for a sub-resource.
    *
    * @param event

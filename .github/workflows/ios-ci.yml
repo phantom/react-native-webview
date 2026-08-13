@@ -23,12 +23,12 @@ jobs:
       - name: Install Pods
         run: ${{matrix.extraEnv}} pod install
         working-directory: example/ios
+      # The job builds and never boots the app, so it takes the generic
+      # simulator destination. Naming one device tied this job to whichever
+      # simulators the runner image happened to ship, and it broke when
+      # `iPhone 16` left the image.
       - name: Build iOS test app
         run: |
-          device_name='iPhone 16'
-          device=$(xcrun simctl list devices "${device_name}" available | grep "${device_name} (")
-          re='\(([-0-9A-Fa-f]+)\)'
-          [[ $device =~ $re ]] || exit 1
-          xcodebuild -workspace WebviewExample.xcworkspace -scheme ReactTestApp -destination "platform=iOS Simulator,id=${BASH_REMATCH[1]}" CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build
+          xcodebuild -workspace WebviewExample.xcworkspace -scheme ReactTestApp -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build
         working-directory: example/ios
     timeout-minutes: 60

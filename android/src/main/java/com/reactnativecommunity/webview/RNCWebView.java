@@ -80,6 +80,7 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
     protected ProgressChangedFilter progressChangedFilter;
     protected boolean mActive = true;
     protected @Nullable String mLastCommittedUrl;
+    protected @Nullable String mMediaCapturePermissionGrantType;
 
     /**
      * WebView must be created with an context of the current activity
@@ -265,6 +266,14 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
         return this.mLastCommittedUrl;
     }
 
+    public void setMediaCapturePermissionGrantType(@Nullable String value) {
+        this.mMediaCapturePermissionGrantType = value;
+    }
+
+    public @Nullable String getMediaCapturePermissionGrantType() {
+        return this.mMediaCapturePermissionGrantType;
+    }
+
     @SuppressLint("RestrictedApi")
     protected void createRNCWebViewBridge(RNCWebView webView) {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)){
@@ -303,9 +312,10 @@ public class RNCWebView extends WebView implements LifecycleEventListener {
 
     private void injectJavascriptObject() {
       if (getSettings().getJavaScriptEnabled()) {
+        String objectJson = RNCJavaScriptString.quote(injectedJavaScriptObject);
         String js = "(function(){\n" +
           "    window." + JAVASCRIPT_INTERFACE + " = window." + JAVASCRIPT_INTERFACE + " || {};\n" +
-          "    window." + JAVASCRIPT_INTERFACE + ".injectedObjectJson = function () { return " + (injectedJavaScriptObject == null ? null : ("`" + injectedJavaScriptObject + "`")) + "; };\n" +
+          "    window." + JAVASCRIPT_INTERFACE + ".injectedObjectJson = function () { return " + objectJson + "; };\n" +
           "})();";
         evaluateJavascriptWithFallback(js);
       }

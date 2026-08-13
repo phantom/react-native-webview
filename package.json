@@ -12,7 +12,7 @@
     "Napas Udomsak <napas@phantom.com>"
   ],
   "license": "MIT",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "homepage": "https://github.com/phantom/react-native-webview#readme",
   "scripts": {
     "release": "yarn changeset publish",
@@ -22,7 +22,6 @@
     "start": "react-native start",
     "windows": "install-windows-test-app --project-directory example/windows && react-native run-windows --root example --arch x64",
     "ci": "CI=true && yarn lint",
-    "ci:publish": "yarn semantic-release",
     "lint": "yarn tsc --noEmit && yarn eslint ./src --ext .ts,.tsx,.js,.jsx",
     "build": "babel --extensions \".ts,.tsx\" --out-dir lib src",
     "prepare:types": "tsc --noEmit false --emitDeclarationOnly --declaration --rootDir src --outDir lib",
@@ -57,7 +56,6 @@
     "@react-native/metro-config": "0.73.5",
     "@react-native/typescript-config": "0.73.1",
     "@rnx-kit/metro-config": "1.3.15",
-    "@semantic-release/git": "7.0.16",
     "@types/invariant": "^2.2.30",
     "@types/jest": "^29.5.12",
     "@types/react": "18.2.61",
@@ -73,13 +71,12 @@
     "react-native-windows": "0.73.8",
     "selenium-appium": "1.0.2",
     "selenium-webdriver": "4.0.0-alpha.7",
-    "semantic-release": "15.13.24",
     "typescript": "5.1.3",
     "winappdriver": "^0.0.7"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/phantom/react-native-webview.git"
+    "url": "git+https://github.com/phantom/react-native-webview.git"
   },
   "files": [
     "android/src",

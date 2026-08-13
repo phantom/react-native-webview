@@ -1537,9 +1537,11 @@ Possible values:
 
 Note that a grant may still result in a prompt, for example if the user has never been prompted for the permission before.
 
-| Type   | Required | Platform |
-| ------ | -------- | -------- |
-| string | No       | iOS      |
+On Android, `deny` blocks camera and microphone requests without showing a WebView or operating-system permission prompt. Other values preserve the existing prompt behavior.
+
+| Type   | Required | Platform     |
+| ------ | -------- | ------------ |
+| string | No       | iOS, Android |
 
 Example:
 
